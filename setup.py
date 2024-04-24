@@ -30,7 +30,7 @@ setup(
     # There are some restrictions on what makes a valid project name
     # specification here:
     # https://packaging.python.org/specifications/core-metadata/#name
-    name="rli_template",  # Required
+    name="data_analysis_editor",  # Required
     # Versions should comply with PEP 440:
     # https://www.python.org/dev/peps/pep-0440/
     #
@@ -66,10 +66,10 @@ setup(
     #
     # This field corresponds to the "Home-Page" metadata field:
     # https://packaging.python.org/specifications/core-metadata/#home-page-optional
-    url="https://github.com/rl-institut/rli_template",  # Optional
+    url="https://github.com/JW-Kraft/data_analysis_editor",  # Optional
     # This should be your name or the name of the organization which owns the
     # project.
-    author="Reiner Lemoine Institut",  # Optional
+    author="Johann Kraft",  # Optional
     # This should be a valid email address corresponding to the author listed
     # above.
     # author_email='pypa-dev@googlegroups.com',  # Optional
@@ -91,11 +91,7 @@ setup(
         # that you indicate whether you support Python 2, Python 3 or both.
         # These classifiers are *not* checked by 'pip install'. See instead
         # 'python_requires' below.
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
-        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3"
     ],
     # This field adds keywords for your project which will appear on the
     # project page. What does your project relate to?
