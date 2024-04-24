@@ -3,7 +3,7 @@
 from datatable_editor.core import DatatableEditor
 
 # Import example data
-from demo_data.demo_data import display_tables_dict
+from datatable_editor.demo_data import display_tables_dict
 
 # Initiated editor object
 editor = DatatableEditor(datatables=display_tables_dict, port=8052, debug=True)
