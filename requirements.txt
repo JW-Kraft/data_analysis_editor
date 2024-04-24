@@ -3,3 +3,4 @@ dash-bootstrap-components==1.6.0
 pandas==2.2.2
 pytest==8.1.1
 setuptools==68.2.2
+flask==3.0.3
