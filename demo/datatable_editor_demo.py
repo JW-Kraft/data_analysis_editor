@@ -1,6 +1,6 @@
 #%% Simple demo for running Datatable editor
 
-from core import DatatableEditor
+from datatable_editor.core import DatatableEditor
 
 # Import example data
 from demo_data.demo_data import display_tables_dict

@@ -1,4 +1,4 @@
-from relational_df import RelationalDf
+from datatable_editor.relational_df import RelationalDf
 import pandas as pd
 
 users = [
