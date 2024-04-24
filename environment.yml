@@ -1,5 +1,5 @@
-name: myvenv
+name: data_analysis_editor
 dependencies:
-- python=3.6
+- python=3.11
 - pip:
    - -r requirements.txt
