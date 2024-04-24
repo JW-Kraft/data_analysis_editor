@@ -16,7 +16,7 @@ import logging, sys
 logging.basicConfig(stream=sys.stderr, level=logging.DEBUG)
 
 
-class DataTableEditor():
+class DatatableEditor:
     def __init__(self, datatables, port, debug=False):
         """
 
