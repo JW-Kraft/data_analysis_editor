@@ -68,7 +68,7 @@ class DatatableEditor:
                     )
                 elif c in foreign_key_columns:  # If column is foreign_key column
                     original_columns.append(
-                        {"name": c, "id": "!fk_" + c, "editable": False}  # ...it is NOT editable and has prefix in id
+                        {"name": c, "id": "!fk_" + c, "editable": True}  # ...it is NOT editable and has prefix in id
                     )
                 else:  # Every regular column...
                     original_columns.append(
@@ -140,8 +140,8 @@ class DatatableEditor:
                                     }, style={'margin': '1px'}),
                                 ], vertical=True),
                                 width=1)
-                        ])
-
+                        ]),
+                    html.Hr()
                 ], id={'type': 'table_row_wrapper', 'table_id': table_relational_df.table_id},
                 style={'display': display}
             )
@@ -303,17 +303,21 @@ class DatatableEditor:
                     # Generate ID of new element to add -> must be unique! -> current max id +1
                     new_row[col['id']] = table_df['id'].max() + 1
                 elif col['id'].startswith('!fk_'):  # if column is query column
-                    # Extract part of table query of this foreign key column -> exists only once -> get first list item
-                    query = [k for k in table_filter_query.split("&&") if col['id'] in k][0]
-                    # Find the index of the equal sign
-                    index = query.find('=')
-
-                    if index == -1:  # if no equal sign is found
+                    if table_filter_query == "":  # if filter_query is empty
                         new_row[col['id']] = ""  # no value is set in this column
-                        # TODO: fk_column is currently not editable -> user would not be able to provide fk_id
-                        # -> for now this is ok?
-                    else:
-                        new_row[col['id']] = int(query[index + 1:])  # value is set to be the fk_id of the current query
+                        print('Row added without fk filter query specified')
+                    else:  # Some filter query is set
+                        # Extract part of table query of this foreign key column -> exists only once -> get first list item
+                        query = [k for k in table_filter_query.split("&&") if col['id'] in k][0]
+                        # Find the index of the equal sign
+                        index = query.find('=')
+
+                        if index == -1:  # if no equal sign is found
+                            new_row[col['id']] = ""  # no value is set in this column
+                            # TODO: fk_column is currently not editable -> user would not be able to provide fk_id
+                            # -> for now this is ok?
+                        else:
+                            new_row[col['id']] = int(query[index + 1:])  # value is set to be the fk_id of the current query
                 else:
                     new_row[col['id']] = ""
 
