@@ -36,6 +36,8 @@ class DatatableEditor:
         # Setup callbacks
         self.set_table_actions_callbacks()
 
+        self.state = None
+
     def run_app(self):
         self.app.run_server(debug=self.debug, port=self.port)
 
@@ -86,12 +88,13 @@ class DatatableEditor:
                 child_table_columns.append(
                     {'name': child_table_relational_df.table_name,  # Column name is child_table name
                      'id': "!child_" + str(child_table_id),
-                     'editable': False  # "Button column" is not editable
+                     'editable': False,  # "Button column" is not editable
+                     'presentation': 'markdown'
                      }
                 )  # Column ID is identifier + child_table id
                 # Add "button text" to display in the button column
                 if len(df.index) > 0:  # only if the table to display is not empty
-                    df.loc[:, "!child_" + str(child_table_id)] = 'Click me!'
+                    df.loc[:, "!child_" + str(child_table_id)] = '<button type="button" class="btn btn-secondary">Show</button>'
 
             # Add original and custom created child_table columns
             columns = original_columns + child_table_columns
@@ -112,6 +115,7 @@ class DatatableEditor:
                 selected_rows=[],
                 page_action='native',
                 page_current=0,
+                markdown_options={'html': True}
             ),
 
             # Create new row to add to app HTML layout
@@ -122,10 +126,9 @@ class DatatableEditor:
 
             new_table_row = html.Div(
                 [
-                    dbc.Row(dbc.Col(html.H2(header))),
                     dbc.Row(
                         [
-                            dbc.Col(table, width=11),
+                            dbc.Col(html.H2(header), width=4),
                             dbc.Col(dbc.ButtonGroup(
                                 [  # don't display close button for first table
                                     dbc.Button("close", id={
@@ -138,8 +141,13 @@ class DatatableEditor:
                                         "table_id": table_relational_df.table_id,
                                         'table_number': table_number
                                     }, style={'margin': '1px'}),
-                                ], vertical=True),
-                                width=1)
+                                ]),
+                                width=8)
+                        ]
+                    ),
+                    dbc.Row(
+                        [
+                            dbc.Col(table)
                         ]),
                     html.Hr()
                 ], id={'type': 'table_row_wrapper', 'table_id': table_relational_df.table_id},
@@ -298,7 +306,7 @@ class DatatableEditor:
             new_row = {}
             for col in table_columns:
                 if col['id'].startswith('!child_'):  # if column is button column
-                    new_row[col['id']] = 'Click me! (added)'
+                    new_row[col['id']] = 'Click me!'
                 elif col['id'] == 'id':  # if column is ID column
                     # Generate ID of new element to add -> must be unique! -> current max id +1
                     new_row[col['id']] = table_df['id'].max() + 1

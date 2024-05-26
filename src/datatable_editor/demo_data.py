@@ -46,9 +46,9 @@ usage_windows = [
 
 
 
-users = RelationalDf('users', 'users', pd.DataFrame(users))
-appliances = RelationalDf('appliances', 'appliances',  pd.DataFrame(appliances))
-usage_windows = RelationalDf('usage_windows', 'usage_windows',  pd.DataFrame(usage_windows))
+users = RelationalDf('users', 'Users', pd.DataFrame(users))
+appliances = RelationalDf('appliances', 'Electrical appliances',  pd.DataFrame(appliances))
+usage_windows = RelationalDf('usage_windows', 'Usage Windows',  pd.DataFrame(usage_windows))
 users.add_child_table(appliances, 'user_id')
 appliances.add_child_table(usage_windows, 'appliance_id')
 
