@@ -1,157 +1,84 @@
 #%%
 import pandas as pd
 from datatable_editor.relational_df import RelationalDf
-from datatable_editor.demo_input_dict import input_dict
 
-#%% Generate table data clean
+def read_sub_data(data_dict, data_info, output_dict, current_table_id, current_parent_element_id=None):
+    """
+    Function to read data of nested dict
+    - can be recursively called to read data from lower level of nested dict
 
-"""
-1. Provide dict of tables data
-    - table_id (matching dict)
-    - table_name (to be displayed in editor)
-    - child tables, fk_column name
-2. Prepare output_dict containing relational_dfs
-    - add relational_df to output_dict for every table_name
-3. Fill dataframes
-    3.1 Loop through input_dict
-        - detect if 
-"""
+    :param data_dict:
+    :param data_info:
+    :param output_dict:
+    :param current_table_id:
+    :param current_parent_element_id:
+    :return:
+    """
 
-main_table = 'users'
-data_info = {
-    'users': {
-        'table_name': 'Users',
-    },
-    'appliances': {
-        'table_name': 'Electrical Appliances',
-        'parent_table': 'users',
-        'fk_column': 'user_id',
-    },
-    'cooking_demands': {
-        'table_name': 'Cooking Demands',
-        'parent_table': 'users',
-        'fk_column': 'user_id',
-    },
-    'drinking_water_demand': {
-        'table_name': 'Drinking Water Demand',
-        'parent_table': 'users',
-        'fk_column': 'user_id',
-    },
-    'service_water_demand': {
-        'table_name': 'Service Water Demand',
-        'parent_table': 'users',
-        'fk_column': 'user_id',
-    },
-    'agro_processing_machines': {
-        'table_name': 'Agro Processing Machines',
-        'parent_table': 'users',
-        'fk_column': 'user_id',
-    }
-}
+    # Loop through data_dict
+    for row_name, row in data_dict.items():
+        # Get this rows id -> must be passed to link potential sub-data
+        if output_dict[current_table_id].df.empty:  # if it is the first row
+            row_id = 0  # row_id is 0
+        else:
+            row_id = output_dict[current_table_id].df.index[-1] + 1  # row_id is previous' row_id + 1
 
-output_dict = {}
-for key, item in data_info.items():
-    output_dict[key] = RelationalDf(key, item['table_name'], pd.DataFrame())
+        # Create dict to contain this new row's data
+        new_row = {'name': row_name}
 
-def read_data(data_dict, this_table_id, parent_element_id, output_dict):
-    new_row = {}
-    # Check if dict is nested (->
-    # Loop through elements (=rows in df) in passed dict
-    for element_name, element_data in data_dict.items():
+        # Check if this tables entries are linked to parents
+        if current_parent_element_id is not None:
+            # Add entry for foreign key column with the corresponding parent element ID
+            new_row[data_info[current_table_id]['fk_column']] = current_parent_element_id
 
-        # Loop through each entry of data
-        for key, data in element_data.items():
+        # Loop through sub-dict of data in this row of the data_dict
+        for key, item in row.items():
+            if key in data_info.keys():
+                print(f'Entry {key} contains sub-data')
+                output_dict = read_sub_data(item, data_info, output_dict, key, row_id)
 
-            return 
-def has_nested_dict(dct):
-    return any(isinstance(value, dict) for value in dct.values())
-#%%
-def generate_table_data(input_dict, this_table, parent_table, parent_item_id, subdata_tables, output_dict):
+            else:
+                print(f'Entry {key} contains no sub-data')
+                # Add entry to new_row
+                new_row[key] = str(item)
 
-    # Get row_id of last element of the current output
-    data = output_dict[this_table]['data']
+        # Turn new_row into dataframe
+        new_row_df = pd.DataFrame(new_row, index=[row_id])
 
-    row_id = 0
-    new_row = None
-
-    if input_dict == {}:
-        return output_dict
-
-    for key, entry in input_dict.items():  # loop through every entry of outer dict
-
-        if isinstance(entry, dict):  # If this entry is a dict -> multiple rows to add
-            # All contents of outer dict are added to main_table
-            new_row = {
-                'id': row_id,  # add numeric id
-                'name': key,  # add value for name
-            }
-
-            if parent_table:
-                new_row[f'{parent_table}_id'] = parent_item_id
-
-            for key, value in entry.items():  # Loop through value in sub-dict
-                if key not in subdata_tables:  # This value is not an id of a sub-data table -> does not contain sub-data
-                    new_row[key] = value  # Add as value to new row
-                else:  # This value contains data of a sub-data table
-                    output_dict[this_table]['child_tables'].append(key)  # Add to list of child data ids
-
-                    # Get the data and add to dict
-                    output_dict = generate_table_data(input_dict=value,
-                                                      this_table=key,
-                                                      parent_table=this_table,
-                                                      parent_item_id=row_id,
-                                                      subdata_tables=subdata_tables,
-                                                      output_dict=output_dict)
-
-            # Add new row to output_dict data
-            output_dict[this_table]['data'].append(new_row)
-            row_id = + 1
-
-    if not isinstance(next(iter(input_dict)), dict):  # if the first item is not a dict
-        # Only one row to add
-
-        new_row = {
-            'id': row_id,  # add numeric id TODO get ID from previous item
-            'name': key,  # add value for name
-        }
-
-        if parent_table:
-            new_row[f'{parent_table}_id'] = parent_item_id
-
-        new_row.update(input_dict)
-
-    # Add new row to output_dict data
-    output_dict[this_table]['data'].append(new_row)
+        if output_dict[current_table_id].df.empty:  # If it is the first row (df is empty)
+            output_dict[current_table_id].df = new_row_df  # Set df to be new_row
+        else:
+            # Else, concat row
+            output_dict[current_table_id].df = pd.concat([output_dict[current_table_id].df, new_row_df], axis=0)
 
     return output_dict
 
-subdata_ids = ['appliances', 'cooking_demands', 'drinking_water_demand', 'service_water_demands', 'agro_processing_machines']
+def nested_dict_to_editor_input(input_dict, main_table, data_info):
+    """
+    Converts nested dict to editor input
 
-output_dict = {'users': {'data': [], 'child_tables': []}}
-for k in subdata_ids:
-    output_dict[k] = {'data':[], 'child_tables':[]}
+    :param input_dict: nested dict to be converted
+    :param main_table: name (dict key) of the main table that does not have parents (to be displayed first in editor)
+    :param data_info: dict containing information about the data in the following shape:
+        table_id: {'table_name: (required), 'parent_table': (optional), 'fk_column': (optional)}'
 
-output_dict = generate_table_data(input_dict, 'users', None, None, subdata_ids, output_dict)
+    :return: dict of relational_dfs to be passed to datatable_editor to be displayed
+    """
+    # Preallocate dict containing relational dfs
+    output_dict = {}
+    for key, item in data_info.items():
+        output_dict[key] = RelationalDf(key, item['table_name'], pd.DataFrame())
 
-editor_input_dict = {}
-for table_id, table_data in output_dict.items():
-    editor_input_dict[table_id] = RelationalDf(table_id, table_id, pd.DataFrame(table_data['data']))
-    # Remove duplicates from each elements list of child tables
-    output_dict[table_id]['child_tables'] = list(set(output_dict[table_id]['child_tables']))
+    # Define all parent and child tables
+    for key, relational_df in output_dict.items():
+        if 'parent_table' in data_info[key]:  # If this table has parent table
+            # Add to relational_df
+            relational_df.add_parent_table(output_dict[data_info[key]['parent_table']], data_info[key]['fk_column'])
 
-for table_id, table_data in output_dict.items():
+    output_dict = read_sub_data(input_dict, data_info, output_dict, main_table)
 
-    if table_data['child_tables']:
-        for child_table in table_data['child_tables']:
-            editor_input_dict[table_id].add_child_table(editor_input_dict[child_table], f'{table_id}_id')
+    # Make each dataframe's index id column
+    for key, item in output_dict.items():
+        output_dict[key].df.insert(loc=0, column='id', value=output_dict[key].df.index)
 
-print(editor_input_dict)
-
-#%%
-from datatable_editor.core import DatatableEditor
-
-# Initiated editor object
-editor = DatatableEditor(datatables=editor_input_dict, port=1000, debug=False)
-
-# Run the editor -> will run at localhost:<specified_port>
-editor.run_app()
+    return output_dict
